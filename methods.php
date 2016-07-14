@@ -1,12 +1,56 @@
 <?php
 
-/**
-* get default language object id (WPML)
-*
-* @param $post_id: integer or array
-* @param $post_type: string "page", "post", "attachment" or other custom post type.
-*/
+define( TRANSLATE_DOMAIN,       'translate_domain'  ); //constants for string translation
+define( ORIGINAL_JS,            'original-javascript' ); // constant for original javascript file.
+define( ORIGINAL_CSS,           'original_css' ); // constant for original css file.
+define( CHILD_JS,               'child_javascript' ); // constant for child custom javascript file.
+define( CHILD_CSS,              'child_css' ); // constant for child custom css file.
+define( JS_DIRECTORY,           get_template_directory_uri() . '/js' ); // constant of original js file directory.
+define( CSS_DIRECTORY,          get_template_directory_uri() . '/css' ); // constant of original css file directory.
+define( CHILD_JS_DIRECTORY,     get_stylesheet_directory_uri() . '/js' ); // constant for child custom js directory.
+define( CHILD_CSS_DIRECTORY,    get_stylesheet_directory_uri() . '/css' ); // constant for child custom css directory.
 
+/**
+ * Adding theme support for initialize.
+ */
+
+if ( !function_exists('original_theme_initialize') ) {
+    function original_theme_initialize() {
+        /**
+         * Custom background.
+         */
+        $custom_bg = array(
+                'default-color'         => '#ffffff',
+                'default-image'         => '',
+            );
+        add_theme_support( 'custom_background', $custom_bg );
+
+        /**
+         * HTML5 markup.
+         */
+        $html5 = array(
+                'search_form',
+                'gallery',
+                'caption',
+            );
+        add_theme_support( 'html5', $html5 );
+
+        /**
+         * Enable title tag functions.
+         */
+        add_theme_support( 'title-tag' );
+    }
+}
+add_action( 'after_setup_theme', 'original_theme_initialize' );
+
+/**
+ * get default language object id (WPML)
+ *
+ * @param int $post_id
+ * @param str $post_type string "page", "post", "attachment" or other custom post type.
+ * @return mixed
+ */
+    
 if ( !function_exists('get_lang_id') ) {
     function get_lang_id( $post_id, $post_type = 'page' ) {
 
@@ -55,13 +99,67 @@ if ( !function_exists('get_lang_id') ) {
 }
 
 /**
-* Function to pass the php variables into javascript
-* 
-*
-*/
+ * Enqueue function for javascript.
+ * Hook script & style sheet function to wp_enqueue_style
+ *
+ */
 
-if ( !function_exists('pass_php_to_js') ) {
-    function pass_php_to_js() {
+if ( !function_exists('original_enqueue_files') ) {
+    function original_enqueue_files() {
+
+        original_enqueue_script();
+        original_enqueue_style();
 
     }
 }
+add_action( 'wp_enqueue_style', 'original_enqueue_files' );
+
+if ( !function_exists('original_enqueue_script') ) {
+    function original_enqueue_script() {
+        wp_register_script( ORIGINAL_JS, JS_DIRECTORY.'/core.js', array(), '', true );
+        wp_enqueue_script( ORIGINAL_JS );
+
+        if ( file_exists( CHILD_JS_DIRECTORY.'/custom.js' ) && is_child_theme() ) {
+            wp_register_script( CHILD_JS, CHILD_JS_DIRECTORY.'/custom.js', array(ORIGINAL_JS), '', true );
+            wp_enqueue_script( CHILD_JS );
+        }
+    }
+}
+
+if ( !function_exists('original_enqueue_style') ) {
+    function original_enqueue_style() {
+        wp_enqueue_style( ORIGINAL_CSS, CSS_DIRECTORY . '/core.css', array(), '', false );
+
+        if ( file_exists( CHILD_CSS_DIRECTORY . '/custom.css' ) && is_child_theme() ) {
+            wp_enqueue_style( CHILD_CSS, CHILD_CSS_DIRECTORY . '/custom.css', array(), '', false );
+        }
+    }
+}
+
+
+/**
+ * Function to pass the php variables into javascript
+ * 
+ * @param array $args
+ * @return nothing
+ */
+
+if ( !function_exists('pass_php_to_js') ) {
+    function pass_php_to_js( $args = array() ) {
+
+        $default = array(
+                'blog_name'     => get_bloginfo( 'name' ),
+                'blog_url'      => get_bloginfo( 'url' ),
+                'blog_email'    => get_bloginfo( 'admin_email' ),
+                's_sheet_dir'   => get_bloginfo( 'stylesheet_directory' ),
+            );
+
+        if ( !empty($args) ) {
+
+            $args = array_merge( $default, $args );
+            
+        }
+        wp_localize_script( ORIGINAL_JS, 'php_array', $args );
+    }
+}
+add_action( 'original_enqueue_files', 'pass_php_to_js' );
