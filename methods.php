@@ -163,3 +163,49 @@ if ( !function_exists('pass_php_to_js') ) {
     }
 }
 add_action( 'original_enqueue_files', 'pass_php_to_js' );
+
+/**
+ * Function if using filegallery plugin.
+ * @param int $post_id
+ * @param str|arr $media_tag
+ * @return arr $attachment_id return array of post id.
+ *
+ */
+if ( !function_exists('get_your_demanded_image_id') ) {
+    function get_your_demanded_image_id( $post_id, $media_tag = array() ) {
+
+        $default = array(
+            'post_type'         => 'attachment',
+            'posts_per_page'    => -1,
+            'post_parent'       => $post_id,
+            'post_status'       => 'inherit',
+            'post_mime_type'    => 'image',
+            'tax_query'         => array(
+                array(
+                    'taxonomy'      => 'media_tag',
+                    'field'         => 'name',
+                    'terms'         => $media_tag,
+                ),
+            ),
+        );
+
+        if ( !empty($media_tag) && !empty($post_id) ) {
+            $attachments = get_posts($default);
+
+            if ( !empty($attachments) ) {
+                $attachment_id = array();
+
+                foreach ( $attachments as $attachment ) {
+                    $attachment_id[] = $attachment->ID;
+                }
+                wp_reset_query();
+                return $attachment_id;
+
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+}
