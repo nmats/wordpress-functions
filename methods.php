@@ -209,3 +209,40 @@ if ( !function_exists('get_your_demanded_image_id') ) {
         }
     }
 }
+
+/**
+ * Sinple SNS Share button. Using Fontawesome to show icons.
+ */
+if ( !function_exists('santika_render_share_button') ) {
+    function santika_render_share_button( $link = '' ) {
+        if ( $link == '' ) return null;
+
+        $social_link = array(
+            'facebook'      => 'https://www.facebook.com/sharer/sharer.php?u=',
+            'twitter'       => 'https://twitter.com/intent/tweet?url=',
+            'google-plus'   => 'https://plus.google.com/share?url=',
+            'email'         => 'mailto:your@email.com?'
+        );
+
+        $buttons = array();
+
+        foreach ($social_link as $key => $value) {
+            switch ($key) {
+                case 'facebook':
+                case 'twitter':
+                case 'google-plus':
+                    $href = $value . urlencode($link);
+                    $a = '<a href="'.$href.'" onclick="javascript:window.open(this.href, \'\', \'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600\');return false;"><i class="fa fa-'.$key.'"></i></a>';
+                    array_push($buttons, $a);
+                    break;
+                case 'email':
+                    $href = $value."body=" . urlencode($link);
+                    $a = "<a href='$href'><i class='fa fa-$key'></i></a>";
+                    array_push($buttons, $a);
+                    break;
+            }
+        }
+
+        return implode(' ', $buttons);
+    }
+}
