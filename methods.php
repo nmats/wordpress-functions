@@ -212,15 +212,18 @@ if ( !function_exists('get_your_demanded_image_id') ) {
 
 /**
  * Sinple SNS Share button. Using Fontawesome to show icons.
+ * @param str $link: page link to be shared.
  */
-if ( !function_exists('santika_render_share_button') ) {
-    function santika_render_share_button( $link = '' ) {
+if ( !function_exists('simple_render_share_button') ) {
+    function simple_render_share_button( $link = '' ) {
         if ( $link == '' ) return null;
 
         $social_link = array(
             'facebook'      => 'https://www.facebook.com/sharer/sharer.php?u=',
             'twitter'       => 'https://twitter.com/intent/tweet?url=',
             'google-plus'   => 'https://plus.google.com/share?url=',
+            'pinterest'     => 'https://pinterest.com/pin/create/button/?url=',
+            'linkedin'      => 'https://www.linkedin.com/shareArticle?mini=true&url=',
             'email'         => 'mailto:your@email.com?'
         );
 
@@ -231,13 +234,15 @@ if ( !function_exists('santika_render_share_button') ) {
                 case 'facebook':
                 case 'twitter':
                 case 'google-plus':
+                case 'pinterest':
+                case 'linkedin':
                     $href = $value . urlencode($link);
                     $a = '<a href="'.$href.'" onclick="javascript:window.open(this.href, \'\', \'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600\');return false;"><i class="fa fa-'.$key.'"></i></a>';
                     array_push($buttons, $a);
                     break;
                 case 'email':
                     $href = $value."body=" . urlencode($link);
-                    $a = "<a href='$href'><i class='fa fa-$key'></i></a>";
+                    $a = "<a href='$href'><i class='fa fa-envelope'></i></a>";
                     array_push($buttons, $a);
                     break;
             }
